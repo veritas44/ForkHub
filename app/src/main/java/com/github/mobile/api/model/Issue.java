@@ -15,10 +15,11 @@
  */
 package com.github.mobile.api.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-public class Issue {
+public class Issue implements Serializable {
     public long id;
 
     public Repository repository;
@@ -76,6 +77,10 @@ public class Issue {
         issue.setCreatedAt(created_at);
         issue.setClosedAt(closed_at);
         issue.setUpdatedAt(updated_at);
+        if (milestone != null){
+            issue.setMilestone(milestone.getOldModel());
+        }
+
         if (user != null) {
             issue.setUser(user.getOldModel());
         }

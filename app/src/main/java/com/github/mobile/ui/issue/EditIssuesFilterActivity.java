@@ -145,7 +145,7 @@ public class EditIssuesFilterActivity extends DialogFragmentActivity {
                     milestoneDialog = new MilestoneDialog(
                             EditIssuesFilterActivity.this, REQUEST_MILESTONE,
                             repository, milestones);
-                milestoneDialog.show(filter.getMilestone());
+                milestoneDialog.show(filter.getMilestone().getOldModel());
             }
         };
 
@@ -236,9 +236,9 @@ public class EditIssuesFilterActivity extends DialogFragmentActivity {
     }
 
     private void updateMilestone() {
-        Milestone selected = filter.getMilestone();
+        com.github.mobile.api.model.Milestone selected = filter.getMilestone();
         if (selected != null)
-            milestoneText.setText(selected.getTitle());
+            milestoneText.setText(selected.getOldModel().getTitle());
         else
             milestoneText.setText(R.string.none);
     }
@@ -265,7 +265,7 @@ public class EditIssuesFilterActivity extends DialogFragmentActivity {
             updateLabels();
             break;
         case REQUEST_MILESTONE:
-            filter.setMilestone(MilestoneDialogFragment.getSelected(arguments));
+            filter.setMilestone(new com.github.mobile.api.model.Milestone(MilestoneDialogFragment.getSelected(arguments)));
             updateMilestone();
             break;
         case REQUEST_ASSIGNEE:

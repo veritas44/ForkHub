@@ -13,51 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.mobile.ui.issue;
+package com.github.mobile.ui.milestone;
 
-import static android.app.Activity.RESULT_OK;
-import static android.content.DialogInterface.BUTTON_NEGATIVE;
-import static android.content.DialogInterface.BUTTON_NEUTRAL;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 
 import com.github.kevinsawicki.wishlist.SingleTypeAdapter;
-import com.github.kevinsawicki.wishlist.ViewUpdater;
-import com.github.kevinsawicki.wishlist.ViewUtils;
 import com.github.mobile.R;
+import com.github.mobile.api.model.Issue;
 import com.github.mobile.ui.DialogFragmentActivity;
 import com.github.mobile.ui.SingleChoiceDialogFragment;
 
 import java.util.ArrayList;
 
-import org.eclipse.egit.github.core.Milestone;
+import static android.app.Activity.RESULT_OK;
+import static android.content.DialogInterface.BUTTON_NEGATIVE;
 
 /**
- * Dialog fragment to select an issue milestone
+ * Dialog fragment to add an issue to milestone
  */
-public class MilestoneDialogFragment extends SingleChoiceDialogFragment {
+public class IssueDialogFragment extends SingleChoiceDialogFragment {
 
-    private static class MilestoneListAdapter extends
-            SingleTypeAdapter<Milestone> {
+    private static class IssueListAdapter extends
+            SingleTypeAdapter<Issue> {
 
-        private final int selected;
 
-        public MilestoneListAdapter(LayoutInflater inflater,
-                Milestone[] milestones, int selected) {
+        public IssueListAdapter(LayoutInflater inflater,
+                Issue[] issues) {
             super(inflater, R.layout.milestone_item);
 
-            this.selected = selected;
-            setItems(milestones);
+            setItems(issues);
         }
 
         @Override
@@ -67,13 +60,13 @@ public class MilestoneDialogFragment extends SingleChoiceDialogFragment {
         }
 
         @Override
-        protected void update(int position, Milestone item) {
-            setText(1, item.getTitle());
+        protected void update(int position, Issue item) {
+            setText(1, item.title);
         }
 
         @Override
         public long getItemId(int position) {
-            return getItem(position).getNumber();
+            return getItem(position).number;
         }
     }
 
@@ -83,8 +76,8 @@ public class MilestoneDialogFragment extends SingleChoiceDialogFragment {
      * @param arguments
      * @return milestone
      */
-    public static Milestone getSelected(Bundle arguments) {
-        return (Milestone) arguments.getSerializable(ARG_SELECTED);
+    public static Issue getSelected(Bundle arguments) {
+        return (Issue) arguments.getSerializable(ARG_SELECTED);
     }
 
     /**
@@ -95,24 +88,21 @@ public class MilestoneDialogFragment extends SingleChoiceDialogFragment {
      * @param title
      * @param message
      * @param choices
-     * @param selectedChoice
      */
     public static void show(final DialogFragmentActivity activity,
             final int requestCode, final String title, final String message,
-            ArrayList<Milestone> choices, final int selectedChoice) {
-        show(activity, requestCode, title, message, choices, selectedChoice,
-                new MilestoneDialogFragment());
+            ArrayList<Issue> choices) {
+        show(activity, requestCode, title, message, choices, -1,
+                new IssueDialogFragment());
     }
 
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         Activity activity = getActivity();
-        Bundle arguments = getArguments();
 
         final AlertDialog dialog = createDialog();
         dialog.setButton(BUTTON_NEGATIVE, activity.getString(R.string.cancel),
                 this);
-        dialog.setButton(BUTTON_NEUTRAL, activity.getString(R.string.clear), this);
 
         LayoutInflater inflater = activity.getLayoutInflater();
 
@@ -127,21 +117,18 @@ public class MilestoneDialogFragment extends SingleChoiceDialogFragment {
             }
         });
 
-        ArrayList<Milestone> choices = getChoices();
-        int selected = arguments.getInt(ARG_SELECTED_CHOICE);
-        MilestoneListAdapter adapter = new MilestoneListAdapter(inflater,
-                choices.toArray(new Milestone[choices.size()]), selected);
+        ArrayList<Issue> choices = getChoices();
+        IssueListAdapter adapter = new IssueListAdapter(inflater,
+                choices.toArray(new Issue[choices.size()]));
         view.setAdapter(adapter);
-        if (selected >= 0)
-            view.setSelection(selected);
         dialog.setView(view);
 
         return dialog;
     }
 
     @SuppressWarnings("unchecked")
-    private ArrayList<Milestone> getChoices() {
-        return (ArrayList<Milestone>) getArguments().getSerializable(
+    private ArrayList<Issue> getChoices() {
+        return (ArrayList<Issue>) getArguments().getSerializable(
                 ARG_CHOICES);
     }
 
@@ -151,9 +138,6 @@ public class MilestoneDialogFragment extends SingleChoiceDialogFragment {
 
         switch (which) {
         case BUTTON_NEGATIVE:
-            break;
-        case BUTTON_NEUTRAL:
-            onResult(RESULT_OK);
             break;
         default:
             getArguments().putSerializable(ARG_SELECTED,
